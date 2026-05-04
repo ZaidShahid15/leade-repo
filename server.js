@@ -119,7 +119,23 @@ async function bootstrap() {
 
     app.set('io', io);
     app.use(pinoHttp({ logger }));
-    app.use(helmet());
+    app.use(helmet({
+        contentSecurityPolicy: {
+            directives: {
+                defaultSrc: ["'self'"],
+                baseUri: ["'self'"],
+                fontSrc: ["'self'", 'https:', 'data:'],
+                formAction: ["'self'"],
+                frameAncestors: ["'self'"],
+                imgSrc: ["'self'", 'data:', 'https://*.basemaps.cartocdn.com'],
+                objectSrc: ["'none'"],
+                scriptSrc: ["'self'", 'https://unpkg.com', 'https://cdnjs.cloudflare.com', 'https://cdn.socket.io'],
+                scriptSrcAttr: ["'none'"],
+                styleSrc: ["'self'", 'https:', "'unsafe-inline'"],
+                upgradeInsecureRequests: []
+            }
+        }
+    }));
     app.use(cors(corsOptions));
     app.use(express.json({ limit: '2mb' }));
     app.use(express.urlencoded({ extended: false }));
