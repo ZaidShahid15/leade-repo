@@ -84,6 +84,14 @@ class LeadGenApp {
     }
 
     bindEvents() {
+        const on = (id, event, handler) => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.addEventListener(event, handler);
+            }
+            return el;
+        };
+
         document.querySelectorAll('.nav-item[data-view]').forEach(item => {
             item.addEventListener('click', (e) => {
                 e.preventDefault();
@@ -92,17 +100,17 @@ class LeadGenApp {
             });
         });
 
-        document.getElementById('sidebar-toggle').addEventListener('click', () => {
+        on('sidebar-toggle', 'click', () => {
             document.getElementById('sidebar').classList.toggle('open');
         });
 
-        document.getElementById('btn-new-search').addEventListener('click', () => {
+        on('btn-new-search', 'click', () => {
             if (!this.ensureAuthenticated()) return;
             this.switchView('discover');
         });
 
-        document.getElementById('search-keyword').addEventListener('input', () => this.validateSearchForm());
-        document.getElementById('btn-start-search').addEventListener('click', () => this.startSearch());
+        on('search-keyword', 'input', () => this.validateSearchForm());
+        on('btn-start-search', 'click', () => this.startSearch());
 
         document.querySelectorAll('.filter-btn[data-filter]').forEach(btn => {
             btn.addEventListener('click', () => {
@@ -111,17 +119,20 @@ class LeadGenApp {
             });
         });
 
-        document.getElementById('leads-filter-input').addEventListener('input', (e) => {
+        on('leads-filter-input', 'input', (e) => {
             if (!this.ensureAuthenticated()) return;
             this.filterKeyword = e.target.value;
             this.currentPage = 1;
             this.loadLeads();
         });
 
-        document.getElementById('global-search').addEventListener('input', (e) => {
+        on('global-search', 'input', (e) => {
             if (!this.ensureAuthenticated()) return;
             if (this.currentView !== 'leads') this.switchView('leads');
-            document.getElementById('leads-filter-input').value = e.target.value;
+            const leadsFilter = document.getElementById('leads-filter-input');
+            if (leadsFilter) {
+                leadsFilter.value = e.target.value;
+            }
             this.filterKeyword = e.target.value;
             this.currentPage = 1;
             this.loadLeads();
@@ -141,7 +152,7 @@ class LeadGenApp {
             });
         });
 
-        document.getElementById('btn-prev-page').addEventListener('click', () => {
+        on('btn-prev-page', 'click', () => {
             if (!this.ensureAuthenticated()) return;
             if (this.currentPage > 1) {
                 this.currentPage--;
@@ -149,7 +160,7 @@ class LeadGenApp {
             }
         });
 
-        document.getElementById('btn-next-page').addEventListener('click', () => {
+        on('btn-next-page', 'click', () => {
             if (!this.ensureAuthenticated()) return;
             if (this.currentPage < this.totalPages) {
                 this.currentPage++;
@@ -157,60 +168,62 @@ class LeadGenApp {
             }
         });
 
-        document.getElementById('btn-export-json').addEventListener('click', () => this.exportLeads('json'));
-        document.getElementById('btn-export-csv').addEventListener('click', () => this.exportLeads('csv'));
-        document.getElementById('btn-clear-leads').addEventListener('click', () => this.clearLeads());
-        document.getElementById('btn-clear-all-data').addEventListener('click', () => this.clearLeads());
-        document.getElementById('btn-crawl-all').addEventListener('click', () => this.startCrawl());
-        document.getElementById('btn-start-crawl').addEventListener('click', () => this.startCrawl());
-        document.getElementById('btn-single-crawl').addEventListener('click', () => this.crawlSingleUrlTable());
-        document.getElementById('sites-csv-file').addEventListener('change', (e) => this.onSitesFileSelected(e));
-        document.getElementById('btn-start-site-upload').addEventListener('click', () => this.startSiteUploadCrawl());
-        document.getElementById('btn-download-site-results').addEventListener('click', () => this.downloadSiteCrawlResults());
-        document.getElementById('btn-start-linkedin-search').addEventListener('click', () => this.startLinkedinSearch());
-        document.getElementById('btn-save-settings').addEventListener('click', () => this.saveSettings());
-        document.getElementById('btn-demo-crawl').addEventListener('click', () => this.startDemo('crawl'));
-        document.getElementById('btn-demo-outreach').addEventListener('click', () => this.startDemo('outreach'));
-        document.getElementById('btn-toggle-key').addEventListener('click', () => {
+        on('btn-export-json', 'click', () => this.exportLeads('json'));
+        on('btn-export-csv', 'click', () => this.exportLeads('csv'));
+        on('btn-clear-leads', 'click', () => this.clearLeads());
+        on('btn-clear-all-data', 'click', () => this.clearLeads());
+        on('btn-crawl-all', 'click', () => this.startCrawl());
+        on('btn-start-crawl', 'click', () => this.startCrawl());
+        on('btn-single-crawl', 'click', () => this.crawlSingleUrlTable());
+        on('sites-csv-file', 'change', (e) => this.onSitesFileSelected(e));
+        on('btn-start-site-upload', 'click', () => this.startSiteUploadCrawl());
+        on('btn-download-site-results', 'click', () => this.downloadSiteCrawlResults());
+        on('btn-start-linkedin-search', 'click', () => this.startLinkedinSearch());
+        on('btn-save-settings', 'click', () => this.saveSettings());
+        on('btn-demo-crawl', 'click', () => this.startDemo('crawl'));
+        on('btn-demo-outreach', 'click', () => this.startDemo('outreach'));
+        on('btn-toggle-key', 'click', () => {
             const input = document.getElementById('settings-api-key');
-            input.type = input.type === 'password' ? 'text' : 'password';
+            if (input) {
+                input.type = input.type === 'password' ? 'text' : 'password';
+            }
         });
-        document.getElementById('outreach-csv-file').addEventListener('change', (e) => this.onOutreachFileSelected(e));
-        document.getElementById('btn-save-outreach-config').addEventListener('click', () => this.saveOutreachConfig());
-        document.getElementById('btn-create-outreach-campaign').addEventListener('click', () => this.createOutreachCampaign());
-        document.getElementById('btn-clean-outreach-emails').addEventListener('click', () => this.cleanOutreachEmails());
-        document.getElementById('btn-start-ai-campaign').addEventListener('click', () => this.startSelectedAiCampaign());
-        document.getElementById('btn-send-manual-email').addEventListener('click', () => this.sendManualEmail());
+        on('outreach-csv-file', 'change', (e) => this.onOutreachFileSelected(e));
+        on('btn-save-outreach-config', 'click', () => this.saveOutreachConfig());
+        on('btn-create-outreach-campaign', 'click', () => this.createOutreachCampaign());
+        on('btn-clean-outreach-emails', 'click', () => this.cleanOutreachEmails());
+        on('btn-start-ai-campaign', 'click', () => this.startSelectedAiCampaign());
+        on('btn-send-manual-email', 'click', () => this.sendManualEmail());
 
         const closeBtn = document.getElementById('close-search-panel');
         if (closeBtn) closeBtn.addEventListener('click', () => {
             document.getElementById('search-panel').style.display = 'none';
         });
 
-        document.getElementById('select-all').addEventListener('change', (e) => {
+        on('select-all', 'change', (e) => {
             document.querySelectorAll('.lead-checkbox').forEach(cb => {
                 cb.checked = e.target.checked;
             });
         });
 
-        document.getElementById('auth-login-form').addEventListener('submit', (e) => {
+        on('auth-login-form', 'submit', (e) => {
             e.preventDefault();
             this.login();
         });
 
-        document.getElementById('auth-register-form').addEventListener('submit', (e) => {
+        on('auth-register-form', 'submit', (e) => {
             e.preventDefault();
             this.register();
         });
 
-        document.getElementById('btn-auth-show-register').addEventListener('click', () => this.setAuthMode('register'));
-        document.getElementById('btn-auth-show-login').addEventListener('click', () => this.setAuthMode('login'));
-        document.getElementById('btn-logout').addEventListener('click', () => this.logout());
-        document.getElementById('btn-demo-close').addEventListener('click', () => this.closeDemo());
-        document.getElementById('btn-demo-skip').addEventListener('click', () => this.closeDemo());
-        document.getElementById('btn-demo-prev').addEventListener('click', () => this.prevDemoStep());
-        document.getElementById('btn-demo-next').addEventListener('click', () => this.nextDemoStep());
-        document.getElementById('demo-modal').addEventListener('click', (e) => {
+        on('btn-auth-show-register', 'click', () => this.setAuthMode('register'));
+        on('btn-auth-show-login', 'click', () => this.setAuthMode('login'));
+        on('btn-logout', 'click', () => this.logout());
+        on('btn-demo-close', 'click', () => this.closeDemo());
+        on('btn-demo-skip', 'click', () => this.closeDemo());
+        on('btn-demo-prev', 'click', () => this.prevDemoStep());
+        on('btn-demo-next', 'click', () => this.nextDemoStep());
+        on('demo-modal', 'click', (e) => {
             if (e.target.id === 'demo-modal') {
                 this.closeDemo();
             }
