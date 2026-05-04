@@ -1,0 +1,1021 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="LeadGen Pro - AI-powered local business lead generation platform. Discover, crawl, and extract contact information from businesses worldwide.">
+    <title>LeadGen Pro - Local Business Lead Generation Platform</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body class="auth-locked">
+    <section class="auth-shell" id="auth-shell">
+        <div class="auth-panel">
+            <div class="auth-brand">
+                <div class="brand-icon">
+                    <i data-lucide="radar" class="brand-icon-svg"></i>
+                </div>
+                <div>
+                    <h1>LeadGen<span class="brand-accent">Pro</span></h1>
+                    <p>Secure lead generation workspace</p>
+                </div>
+            </div>
+
+            <div class="auth-copy">
+                <h2 id="auth-title">Sign in</h2>
+                <p id="auth-subtitle">Sign in with your account to access your workspace.</p>
+            </div>
+
+            <div class="auth-status" id="auth-status" style="display:none"></div>
+
+            <div id="auth-login-panel">
+                <form class="auth-form" id="auth-login-form">
+                    <div class="form-group">
+                        <label for="auth-login-email">Email</label>
+                        <input type="email" id="auth-login-email" class="form-input" placeholder="you@example.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="auth-login-password">Password</label>
+                        <input type="password" id="auth-login-password" class="form-input" placeholder="Enter your password" required>
+                    </div>
+                    <button class="btn btn-primary btn-full" type="submit">
+                        <i data-lucide="log-in"></i>
+                        <span>Sign In</span>
+                    </button>
+                </form>
+                <div class="auth-switch">
+                    <span>Need an account?</span>
+                    <button class="btn btn-ghost btn-sm" id="btn-auth-show-register" type="button">Create Account</button>
+                </div>
+            </div>
+
+            <div id="auth-register-panel" style="display:none">
+                <form class="auth-form" id="auth-register-form">
+                    <div class="form-group">
+                        <label for="auth-register-name">Full name</label>
+                        <input type="text" id="auth-register-name" class="form-input" placeholder="Jane Doe" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="auth-register-email">Email</label>
+                        <input type="email" id="auth-register-email" class="form-input" placeholder="you@example.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="auth-register-password">Password</label>
+                        <input type="password" id="auth-register-password" class="form-input" placeholder="Minimum 10 characters" required>
+                    </div>
+                    <button class="btn btn-primary btn-full" type="submit">
+                        <i data-lucide="user-plus"></i>
+                        <span>Create Account</span>
+                    </button>
+                </form>
+                <div class="auth-switch">
+                    <span>Already have an account?</span>
+                    <button class="btn btn-ghost btn-sm" id="btn-auth-show-login" type="button">Back to Login</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-brand">
+            <div class="brand-icon">
+                <i data-lucide="radar" class="brand-icon-svg"></i>
+            </div>
+            <div class="brand-text">
+                <h1>LeadGen<span class="brand-accent">Pro</span></h1>
+                <p class="brand-tagline">Lead Discovery Engine</p>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <a href="#" class="nav-item active" data-view="dashboard" id="nav-dashboard">
+                <i data-lucide="layout-dashboard"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="#" class="nav-item" data-view="discover" id="nav-discover">
+                <i data-lucide="map-pin"></i>
+                <span>Discover</span>
+                <span class="nav-badge pulse" id="discover-badge" style="display:none">Live</span>
+            </a>
+            <a href="#" class="nav-item" data-view="leads" id="nav-leads">
+                <i data-lucide="users"></i>
+                <span>Leads</span>
+                <span class="nav-count" id="leads-count">0</span>
+            </a>
+            <a href="#" class="nav-item" data-view="crawl" id="nav-crawl">
+                <i data-lucide="globe"></i>
+                <span>Crawler</span>
+            </a>
+            <a href="#" class="nav-item" data-view="site-upload" id="nav-site-upload">
+                <i data-lucide="file-up"></i>
+                <span>Upload Sites CSV</span>
+            </a>
+            <a href="#" class="nav-item" data-view="linkedin" id="nav-linkedin">
+                <i data-lucide="linkedin"></i>
+                <span>LinkedIn Crawler</span>
+            </a>
+            <a href="#" class="nav-item" data-view="outreach" id="nav-outreach">
+                <i data-lucide="send"></i>
+                <span>Outreach</span>
+            </a>
+            <a href="#" class="nav-item" data-view="export" id="nav-export">
+                <i data-lucide="download"></i>
+                <span>Export</span>
+            </a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <a href="#" class="nav-item" data-view="settings" id="nav-settings">
+                <i data-lucide="settings"></i>
+                <span>Settings</span>
+            </a>
+            <div class="connection-status" id="connection-status">
+                <span class="status-dot disconnected"></span>
+                <span>Authentication required</span>
+            </div>
+        </div>
+    </aside>
+
+    <main class="main-content" id="main-content">
+        <header class="topbar">
+            <div class="topbar-left">
+                <button class="btn-icon sidebar-toggle" id="sidebar-toggle">
+                    <i data-lucide="menu"></i>
+                </button>
+                <h2 class="page-title" id="page-title">Dashboard</h2>
+            </div>
+            <div class="topbar-right">
+                <div class="search-box-top">
+                    <i data-lucide="search" class="search-icon-top"></i>
+                    <input type="text" placeholder="Search leads..." id="global-search" class="search-input-top">
+                </div>
+                <div class="topbar-user-meta" id="topbar-user-meta" style="display:none">
+                    <div class="topbar-user-avatar">
+                        <i data-lucide="user-round"></i>
+                    </div>
+                    <div>
+                        <div class="topbar-username" id="topbar-username">Authenticated user</div>
+                        <div class="topbar-role" id="topbar-role">user</div>
+                    </div>
+                </div>
+                <button class="btn btn-primary btn-glow" id="btn-new-search" title="New Search">
+                    <i data-lucide="plus"></i>
+                    <span>New Search</span>
+                </button>
+                <button class="btn btn-ghost" id="btn-logout" style="display:none" type="button">
+                    <i data-lucide="log-out"></i>
+                    <span>Logout</span>
+                </button>
+            </div>
+        </header>
+
+        <section class="view active" id="view-dashboard">
+            <div class="stats-grid" id="stats-grid">
+                <div class="stat-card gradient-purple">
+                    <div class="stat-card-inner">
+                        <div class="stat-info">
+                            <span class="stat-label">Total Leads</span>
+                            <span class="stat-value" id="stat-total">0</span>
+                        </div>
+                        <div class="stat-icon"><i data-lucide="users"></i></div>
+                    </div>
+                    <div class="stat-progress"><div class="stat-progress-bar" style="width:0%"></div></div>
+                </div>
+                <div class="stat-card gradient-blue">
+                    <div class="stat-card-inner">
+                        <div class="stat-info">
+                            <span class="stat-label">Emails Found</span>
+                            <span class="stat-value" id="stat-emails">0</span>
+                        </div>
+                        <div class="stat-icon"><i data-lucide="mail"></i></div>
+                    </div>
+                    <div class="stat-progress"><div class="stat-progress-bar" style="width:0%"></div></div>
+                </div>
+                <div class="stat-card gradient-teal">
+                    <div class="stat-card-inner">
+                        <div class="stat-info">
+                            <span class="stat-label">Phones Found</span>
+                            <span class="stat-value" id="stat-phones">0</span>
+                        </div>
+                        <div class="stat-icon"><i data-lucide="phone"></i></div>
+                    </div>
+                    <div class="stat-progress"><div class="stat-progress-bar" style="width:0%"></div></div>
+                </div>
+                <div class="stat-card gradient-amber">
+                    <div class="stat-card-inner">
+                        <div class="stat-info">
+                            <span class="stat-label">Websites</span>
+                            <span class="stat-value" id="stat-websites">0</span>
+                        </div>
+                        <div class="stat-icon"><i data-lucide="globe"></i></div>
+                    </div>
+                    <div class="stat-progress"><div class="stat-progress-bar" style="width:0%"></div></div>
+                </div>
+                <div class="stat-card gradient-rose">
+                    <div class="stat-card-inner">
+                        <div class="stat-info">
+                            <span class="stat-label">Crawled</span>
+                            <span class="stat-value" id="stat-crawled">0</span>
+                        </div>
+                        <div class="stat-icon"><i data-lucide="scan"></i></div>
+                    </div>
+                    <div class="stat-progress"><div class="stat-progress-bar" style="width:0%"></div></div>
+                </div>
+                <div class="stat-card gradient-emerald">
+                    <div class="stat-card-inner">
+                        <div class="stat-info">
+                            <span class="stat-label">Avg Rating</span>
+                            <span class="stat-value" id="stat-rating">-</span>
+                        </div>
+                        <div class="stat-icon"><i data-lucide="star"></i></div>
+                    </div>
+                    <div class="stat-progress"><div class="stat-progress-bar" style="width:0%"></div></div>
+                </div>
+            </div>
+
+            <div class="dashboard-grid">
+                <div class="card card-lg">
+                    <div class="card-header">
+                        <h3><i data-lucide="clock"></i> Recent Leads</h3>
+                        <button class="btn btn-ghost btn-sm" onclick="app.switchView('leads')">
+                            View All <i data-lucide="arrow-right"></i>
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div class="recent-leads-table" id="recent-leads-table">
+                            <div class="empty-state-mini">
+                                <i data-lucide="inbox"></i>
+                                <p>No leads yet. Start a search to discover businesses.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card card-sm">
+                    <div class="card-header">
+                        <h3><i data-lucide="pie-chart"></i> Top Categories</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="categories-chart" id="categories-chart">
+                            <div class="empty-state-mini">
+                                <i data-lucide="tag"></i>
+                                <p>Category breakdown will appear here.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3><i data-lucide="activity"></i> Live Activity Feed</h3>
+                    <span class="badge badge-live pulse" id="feed-badge">Live</span>
+                </div>
+                <div class="card-body">
+                    <div class="activity-feed" id="activity-feed">
+                        <div class="empty-state-mini">
+                            <i data-lucide="radio"></i>
+                            <p>Activity will appear here in real time.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="view" id="view-discover">
+            <div class="discover-layout">
+                <div class="search-panel glass-panel" id="search-panel">
+                    <div class="search-panel-header">
+                        <h3><i data-lucide="radar"></i> Search Configuration</h3>
+                        <button class="btn-icon btn-close-panel" id="close-search-panel">
+                            <i data-lucide="x"></i>
+                        </button>
+                    </div>
+
+                    <div class="search-form" id="search-form">
+                        <div class="form-group">
+                            <label for="search-keyword"><i data-lucide="search"></i> Business Keyword</label>
+                            <input type="text" id="search-keyword" placeholder="e.g. plumber, restaurant, dentist..." class="form-input">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="search-type"><i data-lucide="tag"></i> Business Type (Optional)</label>
+                            <select id="search-type" class="form-input">
+                                <option value="">All Types</option>
+                                <option value="digital_marketing_agency">Digital Marketing Agency</option>
+                                <option value="seo_agency">SEO Agency</option>
+                                <option value="web_development_company">Web Development Company</option>
+                                <option value="software_development">Software Development Company</option>
+                                <option value="restaurant">Restaurant</option>
+                                <option value="doctor">Doctor</option>
+                                <option value="lawyer">Lawyer</option>
+                                <option value="real_estate_agency">Real Estate Agency</option>
+                                <option value="plumber">Plumber</option>
+                                <option value="electrician">Electrician</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label><i data-lucide="box-select"></i> Search Area</label>
+                            <div class="area-status" id="area-status">
+                                <i data-lucide="alert-circle"></i>
+                                <span>No area selected</span>
+                            </div>
+                            <p class="form-hint">Draw a rectangle or polygon on the map to define your search area.</p>
+                        </div>
+
+                        <label class="checkbox-group">
+                            <input type="checkbox" id="auto-crawl">
+                            <span>Automatically crawl websites after search</span>
+                        </label>
+
+                        <button class="btn btn-primary btn-glow btn-full" id="btn-start-search" disabled>
+                            <i data-lucide="play"></i>
+                            <span>Start Search</span>
+                        </button>
+
+                        <div class="crawl-progress-wrapper" id="search-progress" style="display:none">
+                            <div class="progress-header">
+                                <span class="progress-label" id="progress-label">Initializing search...</span>
+                                <span class="progress-count" id="progress-count">0</span>
+                            </div>
+                            <div class="progress-bar-container">
+                                <div class="progress-bar" id="progress-bar">
+                                    <div class="progress-bar-shimmer"></div>
+                                </div>
+                            </div>
+                            <div class="progress-message" id="progress-message"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="map-wrapper">
+                    <div id="map"></div>
+                </div>
+            </div>
+        </section>
+
+        <section class="view" id="view-leads">
+            <div class="card">
+                <div class="card-header">
+                    <h3><i data-lucide="database"></i> Lead Database</h3>
+                    <span id="leads-total-display">0 leads</span>
+                </div>
+                <div class="card-body">
+                    <div class="leads-toolbar">
+                        <div class="filter-group">
+                            <button class="filter-btn active" data-filter="all">All</button>
+                            <button class="filter-btn" data-filter="emails">With Email</button>
+                            <button class="filter-btn" data-filter="phones">With Phone</button>
+                            <button class="filter-btn" data-filter="websites">With Website</button>
+                            <button class="filter-btn" data-filter="crawled">Crawled</button>
+                        </div>
+                        <div class="leads-actions">
+                            <input type="text" id="leads-filter-input" class="form-input" placeholder="Filter leads...">
+                            <button class="btn btn-danger" id="btn-clear-leads">
+                                <i data-lucide="trash-2"></i>
+                                <span>Clear Leads</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="table-wrapper">
+                        <table class="leads-table">
+                            <thead>
+                                <tr>
+                                    <th class="th-check"><input type="checkbox" id="select-all"></th>
+                                    <th class="sortable" data-sort="name">Business</th>
+                                    <th class="sortable" data-sort="category">Category</th>
+                                    <th>Contact</th>
+                                    <th>Website</th>
+                                    <th class="th-rating sortable" data-sort="rating">Rating</th>
+                                    <th class="th-status sortable" data-sort="updated_at">Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="leads-tbody"></tbody>
+                        </table>
+                        <div class="table-empty" id="leads-empty">
+                            <div class="empty-state">
+                                <div class="empty-icon"><i data-lucide="inbox"></i></div>
+                                <h3>No leads yet</h3>
+                                <p>Run a search to populate your lead database.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pagination">
+                        <button class="btn btn-ghost btn-sm" id="btn-prev-page">Previous</button>
+                        <span id="page-info">Page 1 of 1</span>
+                        <button class="btn btn-ghost btn-sm" id="btn-next-page">Next</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="view" id="view-crawl">
+            <div class="crawl-layout">
+                <div class="card">
+                    <div class="card-header">
+                        <h3><i data-lucide="globe"></i> Bulk Website Crawl</h3>
+                        <button class="btn btn-ghost btn-sm" id="btn-demo-crawl" type="button">
+                            <i data-lucide="sparkles"></i>
+                            <span>Crawl Demo</span>
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-description">Crawl all stored leads with websites to extract contact information.</p>
+                        <div class="crawl-actions">
+                            <button class="btn btn-primary" id="btn-start-crawl">
+                                <i data-lucide="scan"></i> Start Crawl
+                            </button>
+                            <button class="btn btn-ghost" id="btn-crawl-all">
+                                <i data-lucide="refresh-cw"></i> Re-run Crawl
+                            </button>
+                        </div>
+                        <div class="crawl-progress-wrapper" id="crawl-progress-wrapper" style="display:none">
+                            <div class="progress-header">
+                                <span class="progress-label">Crawling websites...</span>
+                                <span class="progress-count" id="crawl-progress-count">0%</span>
+                            </div>
+                            <div class="progress-bar-container">
+                                <div class="progress-bar crawl-bar" id="crawl-progress-bar">
+                                    <div class="progress-bar-shimmer"></div>
+                                </div>
+                            </div>
+                            <div class="site-crawl-meta" id="crawl-meta">Waiting to start...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3><i data-lucide="search-check"></i> Single Website Crawl</h3>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-description">Crawl any website to extract contact information.</p>
+                        <div class="single-crawl-form">
+                            <input type="url" id="single-crawl-url" placeholder="https://example.com" class="form-input">
+                            <button class="btn btn-primary" id="btn-single-crawl">
+                                <i data-lucide="scan"></i> Crawl
+                            </button>
+                        </div>
+                        <div class="single-crawl-result" id="single-crawl-result" style="display:none"></div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3><i data-lucide="table-properties"></i> Single Crawl Results</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-wrapper">
+                            <table class="leads-table site-results-table">
+                                <thead>
+                                    <tr>
+                                        <th>Site</th>
+                                        <th>Emails</th>
+                                        <th>Phones</th>
+                                        <th>Pages</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="single-crawl-results-tbody"></tbody>
+                            </table>
+                            <div class="table-empty" id="single-crawl-results-empty">
+                                <div class="empty-state">
+                                    <div class="empty-icon"><i data-lucide="search-check"></i></div>
+                                    <h3>No single-site crawl results yet</h3>
+                                    <p>Enter one website URL above and start the crawl to see emails and phone numbers here.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="view" id="view-site-upload">
+            <div class="site-upload-layout">
+                <div class="card">
+                    <div class="card-header">
+                        <h3><i data-lucide="file-up"></i> Upload Your Sites CSV</h3>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-description">Upload a CSV file with a <strong>sites</strong> column. Each row should contain a domain like <code>example.com</code>. The crawler will scan internal pages and collect valid emails or phone numbers that can be downloaded as a CSV file.</p>
+
+                        <div class="site-upload-form">
+                            <div class="form-group">
+                                <label for="sites-csv-file"><i data-lucide="file-spreadsheet"></i> CSV File</label>
+                                <input type="file" id="sites-csv-file" class="form-input" accept=".csv,text/csv">
+                                <p class="form-hint">Required column name: <code>sites</code></p>
+                            </div>
+
+                            <div class="site-upload-actions">
+                                <button class="btn btn-primary btn-glow" id="btn-start-site-upload">
+                                    <i data-lucide="scan-search"></i>
+                                    <span>Start Site Crawl</span>
+                                </button>
+                                <button class="btn btn-ghost" id="btn-download-site-results" disabled>
+                                    <i data-lucide="download"></i>
+                                    <span>Download Results CSV</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="site-upload-summary" id="site-upload-summary">
+                            <div class="empty-state-mini">
+                                <i data-lucide="files"></i>
+                                <p>Select a CSV file to preview how many sites are ready.</p>
+                            </div>
+                        </div>
+
+                        <div class="crawl-progress-wrapper" id="site-crawl-progress-wrapper" style="display:none">
+                            <div class="progress-header">
+                                <span class="progress-label">Crawling uploaded sites...</span>
+                                <span class="progress-count" id="site-crawl-progress-count">0%</span>
+                            </div>
+                            <div class="progress-bar-container">
+                                <div class="progress-bar crawl-bar" id="site-crawl-progress-bar">
+                                    <div class="progress-bar-shimmer"></div>
+                                </div>
+                            </div>
+                            <div class="site-crawl-meta" id="site-crawl-meta">Waiting to start...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3><i data-lucide="table-properties"></i> Batch Crawl Results</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-wrapper">
+                            <table class="leads-table site-results-table">
+                                <thead>
+                                    <tr>
+                                        <th>Site</th>
+                                        <th>Emails</th>
+                                        <th>Phones</th>
+                                        <th>Pages</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="site-results-tbody"></tbody>
+                            </table>
+                            <div class="table-empty" id="site-results-empty">
+                                <div class="empty-state">
+                                    <div class="empty-icon"><i data-lucide="file-search"></i></div>
+                                    <h3>No uploaded crawl results yet</h3>
+                                    <p>Upload a CSV with a <code>sites</code> column to start collecting emails and phone numbers.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="view" id="view-linkedin">
+            <div class="linkedin-layout">
+                <div class="card">
+                    <div class="card-header">
+                        <h3><i data-lucide="linkedin"></i> LinkedIn Profile Prospector</h3>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-description">Choose a role keyword and business category, then request a batch of profiles.</p>
+
+                        <div class="linkedin-form-grid">
+                            <div class="form-group">
+                                <label for="linkedin-keyword"><i data-lucide="briefcase"></i> Keyword</label>
+                                <select id="linkedin-keyword" class="form-input">
+                                    <option value="all">All</option>
+                                    <option value="founder">Founder</option>
+                                    <option value="ceo">CEO</option>
+                                    <option value="co-founder">Co-Founder</option>
+                                    <option value="owner">Owner</option>
+                                    <option value="director">Director</option>
+                                    <option value="marketing-manager">Marketing Manager</option>
+                                    <option value="business-development">Business Development</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="linkedin-category"><i data-lucide="layers-3"></i> Category</label>
+                                <select id="linkedin-category" class="form-input">
+                                    <option value="all">All Types</option>
+                                    <option value="software-development">Software Development</option>
+                                    <option value="digital-marketing">Digital Marketing</option>
+                                    <option value="graphic-design">Graphic Design</option>
+                                    <option value="web-development">Web Development</option>
+                                    <option value="seo">SEO</option>
+                                    <option value="branding">Branding</option>
+                                    <option value="ui-ux">UI/UX Design</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="linkedin-limit"><i data-lucide="list-ordered"></i> Minimum Profiles</label>
+                                <input type="number" id="linkedin-limit" class="form-input" min="1" value="50">
+                            </div>
+                        </div>
+
+                        <div class="linkedin-actions">
+                            <a class="btn btn-ghost" href="#" id="btn-linkedin-connect">
+                                <i data-lucide="shield-check"></i>
+                                <span>Connect LinkedIn</span>
+                            </a>
+                            <button class="btn btn-primary btn-glow" id="btn-start-linkedin-search">
+                                <i data-lucide="search-code"></i>
+                                <span>Start LinkedIn Search</span>
+                            </button>
+                        </div>
+
+                        <div class="linkedin-status" id="linkedin-status">
+                            <div class="empty-state-mini">
+                                <i data-lucide="shield-alert"></i>
+                                <p>Sign in to review LinkedIn connection status.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3><i data-lucide="users-round"></i> Profile Results</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-wrapper">
+                            <table class="leads-table linkedin-results-table">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Title</th>
+                                        <th>Category</th>
+                                        <th>Company</th>
+                                        <th>Contact</th>
+                                        <th>Source</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="linkedin-results-tbody"></tbody>
+                            </table>
+                            <div class="table-empty" id="linkedin-results-empty">
+                                <div class="empty-state">
+                                    <div class="empty-icon"><i data-lucide="linkedin"></i></div>
+                                    <h3>No LinkedIn results yet</h3>
+                                    <p>Use the keyword and category dropdowns above to request a batch of profiles.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="view" id="view-outreach">
+            <div class="outreach-layout">
+                <div class="card">
+                    <div class="card-header">
+                        <h3><i data-lucide="mail-check"></i> Mail Configuration</h3>
+                        <button class="btn btn-ghost btn-sm" id="btn-demo-outreach" type="button">
+                            <i data-lucide="sparkles"></i>
+                            <span>Outreach Demo</span>
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-description">Save your SMTP sender details and optional OpenAI key for unique subject lines and message drafts per recipient.</p>
+
+                        <div class="linkedin-form-grid outreach-config-grid">
+                            <div class="form-group">
+                                <label for="outreach-smtp-host"><i data-lucide="server"></i> SMTP Host</label>
+                                <input type="text" id="outreach-smtp-host" class="form-input" placeholder="smtp.gmail.com">
+                            </div>
+                            <div class="form-group">
+                                <label for="outreach-smtp-port"><i data-lucide="waypoints"></i> SMTP Port</label>
+                                <input type="number" id="outreach-smtp-port" class="form-input" placeholder="587">
+                            </div>
+                            <div class="form-group">
+                                <label for="outreach-smtp-user"><i data-lucide="user-round"></i> SMTP Username</label>
+                                <input type="text" id="outreach-smtp-user" class="form-input" placeholder="your@email.com">
+                            </div>
+                            <div class="form-group">
+                                <label for="outreach-smtp-pass"><i data-lucide="key-round"></i> SMTP Password</label>
+                                <input type="password" id="outreach-smtp-pass" class="form-input" placeholder="App password">
+                            </div>
+                            <div class="form-group">
+                                <label for="outreach-from-email"><i data-lucide="mail"></i> From Email</label>
+                                <input type="email" id="outreach-from-email" class="form-input" placeholder="sales@yourdomain.com">
+                            </div>
+                            <div class="form-group">
+                                <label for="outreach-from-name"><i data-lucide="signature"></i> From Name</label>
+                                <input type="text" id="outreach-from-name" class="form-input" placeholder="Your Name">
+                            </div>
+                            <div class="form-group">
+                                <label for="outreach-openai-key"><i data-lucide="sparkles"></i> OpenAI API Key</label>
+                                <input type="password" id="outreach-openai-key" class="form-input" placeholder="sk-...">
+                            </div>
+                            <div class="form-group">
+                                <label for="outreach-openai-model"><i data-lucide="brain-circuit"></i> OpenAI Model</label>
+                                <input type="text" id="outreach-openai-model" class="form-input" placeholder="gpt-5-mini">
+                            </div>
+                        </div>
+
+                        <label class="checkbox-group outreach-checkbox">
+                            <input type="checkbox" id="outreach-smtp-secure">
+                            <span>Use secure SMTP (SSL/TLS)</span>
+                        </label>
+
+                        <div class="form-group">
+                            <label for="outreach-ai-prompt"><i data-lucide="message-square-text"></i> AI Writing Guidance</label>
+                            <textarea id="outreach-ai-prompt" class="form-input outreach-textarea" placeholder="Describe your tone, CTA, offer, and how you want AI to personalize each email."></textarea>
+                        </div>
+
+                        <div class="site-upload-actions">
+                            <button class="btn btn-primary btn-glow" id="btn-save-outreach-config">
+                                <i data-lucide="save"></i>
+                                <span>Save Mail Setup</span>
+                            </button>
+                        </div>
+
+                        <div class="settings-status" id="outreach-config-status" style="display:none"></div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3><i data-lucide="file-spreadsheet"></i> Recipient Upload & Campaign Setup</h3>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-description">Upload a CSV with an <code>email</code> column, review valid and invalid emails, bulk-remove bad ones if needed, then create a campaign.</p>
+
+                        <div class="linkedin-form-grid outreach-config-grid">
+                            <div class="form-group">
+                                <label for="outreach-csv-file"><i data-lucide="file-up"></i> CSV File</label>
+                                <input type="file" id="outreach-csv-file" class="form-input" accept=".csv,text/csv">
+                            </div>
+                            <div class="form-group">
+                                <label for="outreach-email-column"><i data-lucide="columns-3"></i> Email Column Key</label>
+                                <input type="text" id="outreach-email-column" class="form-input" value="email" placeholder="email">
+                            </div>
+                            <div class="form-group">
+                                <label for="outreach-campaign-name"><i data-lucide="folder-pen"></i> Campaign Name</label>
+                                <input type="text" id="outreach-campaign-name" class="form-input" placeholder="April outreach batch">
+                            </div>
+                            <div class="form-group">
+                                <label for="outreach-mode"><i data-lucide="toggle-right"></i> Sending Mode</label>
+                                <select id="outreach-mode" class="form-input">
+                                    <option value="manual">Manual, one by one</option>
+                                    <option value="ai">AI creates each email and sends one by one</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="outreach-niche"><i data-lucide="target"></i> Niche / Context</label>
+                            <textarea id="outreach-niche" class="form-input outreach-textarea" placeholder="Example: I offer web design and SEO for local dentists in Texas."></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="outreach-subject-template"><i data-lucide="text-select"></i> Subject Guidance</label>
+                            <input type="text" id="outreach-subject-template" class="form-input" placeholder="Example: Quick idea for your business growth">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="outreach-message-template"><i data-lucide="mail-plus"></i> Message Guidance / Base Copy</label>
+                            <textarea id="outreach-message-template" class="form-input outreach-textarea outreach-message-template" placeholder="Give the AI your offer, CTA, and the message direction. In manual mode, this acts like your starting note."></textarea>
+                        </div>
+
+                        <div class="site-upload-actions">
+                            <button class="btn btn-primary btn-glow" id="btn-create-outreach-campaign">
+                                <i data-lucide="list-plus"></i>
+                                <span>Create Campaign</span>
+                            </button>
+                            <button class="btn btn-ghost" id="btn-clean-outreach-emails" type="button">
+                                <i data-lucide="shield-check"></i>
+                                <span>Bulk Remove Invalid Emails</span>
+                            </button>
+                            <button class="btn btn-ghost" id="btn-start-ai-campaign" disabled>
+                                <i data-lucide="rocket"></i>
+                                <span>Start AI Sending</span>
+                            </button>
+                        </div>
+
+                        <div class="site-upload-summary" id="outreach-upload-summary">
+                            <div class="empty-state-mini">
+                                <i data-lucide="files"></i>
+                                <p>Upload a CSV to preview how many recipient emails are ready.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3><i data-lucide="send-horizontal"></i> Manual Sender</h3>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-description">In manual mode, the system will pause on one recipient at a time so you can set the exact subject and message, send it, then move to the next recipient.</p>
+
+                        <div class="single-crawl-result" id="outreach-live-status">
+                            <p>No outreach campaign is active yet.</p>
+                        </div>
+
+                        <div class="manual-outreach-panel" id="manual-outreach-panel">
+                            <div class="manual-outreach-meta">
+                                <span class="category-badge" id="manual-campaign-name">No active manual campaign</span>
+                                <span class="status-badge status-pending" id="manual-recipient-email">Waiting for recipient</span>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="manual-email-subject"><i data-lucide="heading-1"></i> Subject For Current Email</label>
+                                <input type="text" id="manual-email-subject" class="form-input" placeholder="Set subject for this email">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="manual-email-message"><i data-lucide="text"></i> Message For Current Email</label>
+                                <textarea id="manual-email-message" class="form-input outreach-textarea outreach-manual-message" placeholder="Write the message for the current recipient, then send to move to the next one."></textarea>
+                            </div>
+
+                            <div class="site-upload-actions">
+                                <button class="btn btn-primary" id="btn-send-manual-email" disabled>
+                                    <i data-lucide="send"></i>
+                                    <span>Send This Email</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3><i data-lucide="list-checks"></i> Outreach Campaigns</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-wrapper">
+                            <table class="leads-table linkedin-results-table">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Mode</th>
+                                        <th>Status</th>
+                                        <th>Sent</th>
+                                        <th>Failed</th>
+                                        <th>Total</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="outreach-campaigns-tbody"></tbody>
+                            </table>
+                            <div class="table-empty" id="outreach-campaigns-empty">
+                                <div class="empty-state">
+                                    <div class="empty-icon"><i data-lucide="mailbox"></i></div>
+                                    <h3>No outreach campaigns yet</h3>
+                                    <p>Create one from your uploaded CSV list to start sending emails one by one.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="view" id="view-export">
+            <div class="export-layout">
+                <div class="card">
+                    <div class="card-header">
+                        <h3><i data-lucide="download"></i> Export Leads</h3>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-description">Download your leads in JSON or CSV format for use in your CRM, email marketing tools, or spreadsheets.</p>
+
+                        <div class="export-options">
+                            <div class="export-card">
+                                <div class="export-card-icon gradient-purple"><i data-lucide="file-json"></i></div>
+                                <h4>JSON Export</h4>
+                                <p>Complete data with all fields, perfect for CRM import and API integrations.</p>
+                                <button class="btn btn-primary" id="btn-export-json" type="button">
+                                    <i data-lucide="download"></i> Download JSON
+                                </button>
+                            </div>
+                            <div class="export-card">
+                                <div class="export-card-icon gradient-teal"><i data-lucide="file-spreadsheet"></i></div>
+                                <h4>CSV Export</h4>
+                                <p>Spreadsheet-compatible format, great for Excel, Google Sheets, and mass emailing.</p>
+                                <button class="btn btn-primary" id="btn-export-csv" type="button">
+                                    <i data-lucide="download"></i> Download CSV
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="view" id="view-settings">
+            <div class="settings-layout">
+                <div class="card">
+                    <div class="card-header">
+                        <h3><i data-lucide="key"></i> API Configuration</h3>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-description">Configure your Google Places API key to enable real business discovery.</p>
+
+                        <div class="form-group">
+                            <label for="settings-api-key">Google Places API Key</label>
+                            <div class="input-with-action">
+                                <input type="password" id="settings-api-key" placeholder="Enter your Google Places API key..." class="form-input">
+                                <button class="btn btn-ghost btn-sm" id="btn-toggle-key" title="Toggle visibility">
+                                    <i data-lucide="eye"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <button class="btn btn-primary" id="btn-save-settings">
+                            <i data-lucide="save"></i> Save Settings
+                        </button>
+
+                        <div class="settings-status" id="settings-status" style="display:none"></div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3><i data-lucide="database"></i> Data Management</h3>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-description">Manage your stored leads.</p>
+                        <div class="data-management-actions">
+                            <button class="btn btn-danger" id="btn-clear-all-data">
+                                <i data-lucide="trash-2"></i> Clear All Leads
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <div class="modal-overlay" id="lead-modal" style="display:none">
+        <div class="modal glass-panel">
+            <div class="modal-header">
+                <h3 id="modal-lead-name">Business Name</h3>
+                <button class="btn-icon" onclick="app.closeModal()">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+            <div class="modal-body" id="modal-lead-body"></div>
+        </div>
+    </div>
+
+    <div class="modal-overlay demo-overlay" id="demo-modal" style="display:none">
+        <div class="modal glass-panel demo-modal">
+            <div class="modal-header demo-modal-header">
+                <div>
+                    <span class="demo-kicker" id="demo-kicker">Guided Demo</span>
+                    <h3 id="demo-title">Demo title</h3>
+                </div>
+                <button class="btn-icon" id="btn-demo-close" type="button">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+            <div class="modal-body demo-modal-body">
+                <div class="demo-progress-meta">
+                    <span id="demo-step-counter">Step 1 of 1</span>
+                    <div class="demo-progress-track">
+                        <div class="demo-progress-bar" id="demo-progress-bar"></div>
+                    </div>
+                </div>
+                <p class="demo-description" id="demo-description"></p>
+                <div class="demo-target-note" id="demo-target-note"></div>
+            </div>
+            <div class="demo-actions">
+                <button class="btn btn-ghost btn-sm" id="btn-demo-prev" type="button">
+                    <i data-lucide="arrow-left"></i>
+                    <span>Back</span>
+                </button>
+                <div class="demo-actions-right">
+                    <button class="btn btn-ghost btn-sm" id="btn-demo-skip" type="button">Close</button>
+                    <button class="btn btn-primary btn-sm" id="btn-demo-next" type="button">
+                        <span>Next</span>
+                        <i data-lucide="arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast-container" id="toast-container"></div>
+
+    <script src="/js/app.js"></script>
+</body>
+</html>
